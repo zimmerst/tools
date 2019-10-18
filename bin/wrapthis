@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+
+import json, os
+from argparse import ArgumentParser
+
+def main(args=None):
+    parser = ArgumentParser(usage="Usage: %(prog)s [options]", description="wrap command with options")
+    parser.add_argument("-m", "--manifest", dest="manifest", type=str, default=None, required=True,
+                        help='manifest.json')
+    parser.add_argument("-c", "--command",  dest="command", type=str, default=None, required=True, help="command to wrap")
+    parser.add_argument("-o", "--opt-style", dest="optstyle", type=str, choices=['--key=value','-key value'], required=False, help="style of option parser", default='--key=value')
+    opts = parser.parse_args(args) 
+    cfg = json.load(open(opts.manifest,"rb"))
+    parsed_options = ""
+    if opts.optstyle == "--key=value":
+	parsed_options = " ".join(["--%s=%s"%(key,value) for key, value in cfg.items()])    
+    else:
+	parsed_options = " ".join(["-%s %s"%(key,value) for key, value in cfg.items()])
+    #print(parsed_options)
+    return("{c} {o}".format(c=opts.command,o=parsed_options))    
+
+if __name__ == "__main__":
+    s=main()
+    print(s)
